@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Интеллектуальная система мониторинга зерна</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+    --card:rgba(255,255,255,.92);
+    --text:#102a1c;
+    --muted:#5b6b61;
+    --green:#166534;
+    --border:rgba(20,83,45,.18);
+    --shadow:0 20px 50px rgba(0,0,0,.18);
+}
+body.dark{
+    --card:rgba(15,23,42,.9);
+    --text:#f8fafc;
+    --muted:#cbd5e1;
+    --green:#22c55e;
+    --border:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    background:
+    linear-gradient(rgba(255,255,255,.72),rgba(255,255,255,.72)),
+    url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+}
+body.dark{
+    background:
+    linear-gradient(rgba(2,6,23,.8),rgba(2,6,23,.85)),
+    url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+}
+.header,.wrapper{max-width:1200px;margin:auto;padding:22px;position:relative}
+.header{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;gap:12px;align-items:center;font-weight:bold}
+.logo-icon{
+    width:50px;height:50px;border-radius:15px;
+    background:linear-gradient(135deg,#15803d,#f59e0b);
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-size:26px;
+}
+.theme-btn,.download-btn,.random-btn,.clear-btn{
+    border:0;padding:13px 18px;border-radius:14px;
+    cursor:pointer;font-weight:bold;
+}
+.theme-btn{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.hero{text-align:center;margin-bottom:25px}
+.hero h1{font-size:42px;color:var(--green);margin:10px 0}
+.hero p{color:var(--muted);font-size:18px}
+.main-grid{display:grid;grid-template-columns:2fr 1fr;gap:25px}
+.panel,.side-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:28px;
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(14px);
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.input-card,.chart-box,.small-card{
+    padding:18px;
+    border-radius:20px;
+    background:rgba(255,255,255,.55);
+    border:1px solid var(--border);
+}
+body.dark .input-card,body.dark .chart-box,body.dark .small-card{
+    background:rgba(15,23,42,.55);
+}
+label{font-weight:bold;display:block;margin-bottom:10px}
+input{
+    width:100%;padding:14px;border-radius:14px;
+    border:1px solid var(--border);font-size:17px;
+}
+body.dark input{background:#020617;color:white}
+.analyze-btn{
+    margin-top:20px;width:100%;border:0;padding:16px;
+    border-radius:16px;color:white;font-size:18px;font-weight:bold;
+    cursor:pointer;background:linear-gradient(135deg,#15803d,#22c55e);
+}
+.action-row{display:flex;gap:12px;margin-top:15px;flex-wrap:wrap}
+.random-btn{background:#d97706;color:white}
+.clear-btn{background:#dc2626;color:white}
+.download-btn{background:#1d4ed8;color:white;margin-top:15px}
+.result{
+    margin-top:25px;padding:22px;border-radius:22px;
+    background:linear-gradient(135deg,rgba(34,197,94,.14),rgba(245,158,11,.16));
+    border-left:8px solid #22c55e;
+}
+.risk-status{
+    margin-top:20px;padding:18px;border-radius:18px;
+    font-weight:bold;font-size:20px;text-align:center;
+}
+.cards{margin-top:25px;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.chart-box{margin-top:25px}
+.bar-row{margin-bottom:15px}
+.bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-weight:bold}
+.bar-bg{height:16px;background:rgba(148,163,184,.35);border-radius:20px;overflow:hidden}
+.bar-fill{
+    height:100%;border-radius:20px;
+    background:linear-gradient(90deg,#22c55e,#f59e0b);
+    width:0%;transition:.5s;
+}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left}
+.side-card{margin-bottom:20px}
+.side-card h3{margin-top:0;color:var(--green)}
+.support-btn{
+    display:block;text-align:center;text-decoration:none;
+    margin-top:15px;padding:13px;border-radius:14px;
+    background:var(--green);color:white;font-weight:bold;
+}
+.footer{
+    margin-top:30px;padding:25px;border-radius:28px;
+    background:rgba(2,6,23,.78);color:white;
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;
+}
+.footer strong{color:#facc15}
+@media(max-width:900px){
+    .main-grid,.form-grid,.cards,.footer{grid-template-columns:1fr}
+    .hero h1{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        <div class="logo-icon">🌾</div>
+        <div>
+            <div>GRAIN AI</div>
+            <small>Интеллектуальный мониторинг зерна</small>
+        </div>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">🌙 Тёмная / светлая тема</button>
+</div>
+
+<div class="wrapper">
+
+<div class="hero">
+    <h1>Интеллектуальная система мониторинга зерна</h1>
+    <p>Анализ температуры и влажности для прогнозирования риска порчи зерновых культур на элеваторах</p>
+</div>
+
+<div class="main-grid">
+
+<div class="panel">
+    <h2>📊 Параметры хранения</h2>
+
+    <form method="POST" onsubmit="saveHistory()">
+        <div class="form-grid">
+            <div class="input-card">
+                <label>🌡️ Температура зерна, °C</label>
+                <input id="temperatureInput" type="number" step="0.1" name="temperature" placeholder="Например: 27" required>
+            </div>
+            <div class="input-card">
+                <label>💧 Влажность зерна, %</label>
+                <input id="humidityInput" type="number" step="0.1" name="humidity" placeholder="Например: 72" required>
+            </div>
+        </div>
+
+        <button class="analyze-btn" type="submit">🚀 Провести анализ</button>
+    </form>
+
+    <div class="action-row">
+        <button class="random-btn" type="button" onclick="randomData()">🎲 Случайные данные</button>
+        <button class="clear-btn" type="button" onclick="clearHistory()">🗑 Очистить историю</button>
+    </div>
+
+    {% if result %}
+    <div class="result">
+        <h2>{{ result }}</h2>
+        <p><b>Рекомендация:</b> {{ recommendation }}</p>
+    </div>
+    {% endif %}
+
+    <div id="riskStatus" class="risk-status" style="background:#dcfce7;color:#166534;">
+        🟢 Статус системы: Низкий риск
+    </div>
+
+    <div class="chart-box">
+        <h2>📈 График температуры и влажности</h2>
+
+        <div class="bar-row">
+            <div class="bar-label"><span>Температура</span><span id="tempValue">0 °C</span></div>
+            <div class="bar-bg"><div id="tempBar" class="bar-fill"></div></div>
+        </div>
+
+        <div class="bar-row">
+            <div class="bar-label"><span>Влажность</span><span id="humValue">0 %</span></div>
+            <div class="bar-bg"><div id="humBar" class="bar-fill"></div></div>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <h2>🧠 Описание алгоритма</h2>
+        <p>
+            Система анализирует температуру и влажность зерновых культур.
+            На основе пороговых значений определяется уровень риска порчи продукции.
+        </p>
+        <ul>
+            <li>🌡 Температура выше 30°C повышает риск самосогревания.</li>
+            <li>💧 Влажность выше 80% способствует развитию плесени.</li>
+            <li>⚠️ Если один параметр выше нормы — система показывает средний риск.</li>
+            <li>🚨 Если оба параметра критические — система показывает высокий риск.</li>
+            <li>📋 Все результаты сохраняются в историю анализов.</li>
+        </ul>
+    </div>
+
+    <div class="cards">
+        <div class="small-card">
+            <h3>✅ Низкий риск</h3>
+            <p>Условия хранения нормальные.</p>
+        </div>
+        <div class="small-card">
+            <h3>⚠️ Средний риск</h3>
+            <p>Требуется дополнительный контроль.</p>
+        </div>
+        <div class="small-card">
+            <h3>🚨 Высокий риск</h3>
+            <p>Необходимо срочно включить вентиляцию.</p>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <h2>📋 История последних анализов</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата и время</th>
+                    <th>Температура</th>
+                    <th>Влажность</th>
+                    <th>Риск</th>
+                </tr>
+            </thead>
+            <tbody id="historyTable">
+                <tr><td colspan="4">История пока пустая</td></tr>
+            </tbody>
+        </table>
+
+        <button class="download-btn" onclick="downloadReport()">📥 Скачать отчёт</button>
+    </div>
+</div>
+
+<div>
+    <div class="side-card">
+        <h3>📅 Текущая дата и время</h3>
+        <p id="datetime">Загрузка...</p>
+    </div>
+
+    <div class="side-card">
+        <h3>🤖 О системе</h3>
+        <p>Программное решение предназначено для автоматизации контроля условий хранения зерна.</p>
+        <ul>
+            <li>Анализ температуры</li>
+            <li>Анализ влажности</li>
+            <li>Прогнозирование риска</li>
+            <li>Формирование отчёта</li>
+        </ul>
+    </div>
+
+    <div class="side-card">
+        <h3>🛟 Поддержка</h3>
+        <p>📧 support@grain-ai.kz</p>
+        <p>📞 +7 (700) 000-00-00</p>
+        <a class="support-btn" href="#">Написать в поддержку</a>
+    </div>
+</div>
+
+</div>
+
+<div class="footer">
+    <div>
+        <h3>🌾 Назначение</h3>
+        <p>Контроль условий хранения зерновых культур и снижение риска порчи продукции.</p>
+    </div>
+    <div>
+        <h3>🎓 Дипломный проект</h3>
+        <p>Выполнил: <strong>Молдашев Темирлан Жангельдинович</strong></p>
+        <p>Группа: <strong>ВТ23-11</strong></p>
+    </div>
+    <div>
+        <h3>🏫 Тема</h3>
+        <p>Разработка системы анализа и прогнозирования условий хранения зерновых культур с применением ИИ</p>
+    </div>
+</div>
+
+</div>
+
+<script>
+function toggleTheme(){
+    document.body.classList.toggle("dark");
+    localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+}
+if(localStorage.getItem("theme") === "dark"){
+    document.body.classList.add("dark");
+}
+
+function updateDateTime(){
+    document.getElementById("datetime").innerText = new Date().toLocaleString("ru-RU");
+}
+setInterval(updateDateTime,1000);
+updateDateTime();
+
+function calculateRisk(temp,hum){
+    if(temp>30 && hum>80) return "Высокий риск";
+    if(temp>25 || hum>70) return "Средний риск";
+    return "Низкий риск";
+}
+
+function updateRiskColor(temp,hum){
+    const block=document.getElementById("riskStatus");
+    const risk=calculateRisk(temp,hum);
+
+    if(risk==="Высокий риск"){
+        block.style.background="#fee2e2";
+        block.style.color="#991b1b";
+        block.innerHTML="🔴 Статус системы: Высокий риск";
+    }else if(risk==="Средний риск"){
+        block.style.background="#fef3c7";
+        block.style.color="#92400e";
+        block.innerHTML="🟡 Статус системы: Средний риск";
+    }else{
+        block.style.background="#dcfce7";
+        block.style.color="#166534";
+        block.innerHTML="🟢 Статус системы: Низкий риск";
+    }
+}
+
+function updateChart(temp,hum){
+    document.getElementById("tempBar").style.width=Math.min((temp/50)*100,100)+"%";
+    document.getElementById("humBar").style.width=Math.min(hum,100)+"%";
+    document.getElementById("tempValue").innerText=temp+" °C";
+    document.getElementById("humValue").innerText=hum+" %";
+    updateRiskColor(temp,hum);
+}
+
+function randomData(){
+    const t=Math.floor(Math.random()*41);
+    const h=Math.floor(Math.random()*101);
+    document.getElementById("temperatureInput").value=t;
+    document.getElementById("humidityInput").value=h;
+    updateChart(t,h);
+}
+
+function saveHistory(){
+    const temp=document.getElementById("temperatureInput").value;
+    const hum=document.getElementById("humidityInput").value;
+    if(!temp || !hum) return;
+
+    const risk=calculateRisk(parseFloat(temp),parseFloat(hum));
+    const now=new Date().toLocaleString("ru-RU");
+
+    let history=JSON.parse(localStorage.getItem("grainHistory")) || [];
+    history.unshift({date:now,temp:temp,hum:hum,risk:risk});
+    history=history.slice(0,7);
+    localStorage.setItem("grainHistory",JSON.stringify(history));
+}
+
+function loadHistory(){
+    const history=JSON.parse(localStorage.getItem("grainHistory")) || [];
+    const table=document.getElementById("historyTable");
+
+    if(history.length===0){
+        table.innerHTML="<tr><td colspan='4'>История пока пустая</td></tr>";
+        updateChart(0,0);
+        return;
+    }
+
+    table.innerHTML="";
+    history.forEach(item=>{
+        const row=document.createElement("tr");
+        row.innerHTML=`
+            <td>${item.date}</td>
+            <td>${item.temp} °C</td>
+            <td>${item.hum} %</td>
+            <td>${item.risk}</td>
+        `;
+        table.appendChild(row);
+    });
+
+    updateChart(parseFloat(history[0].temp),parseFloat(history[0].hum));
+}
+
+function clearHistory(){
+    localStorage.removeItem("grainHistory");
+    loadHistory();
+}
+
+function downloadReport(){
+    const history=JSON.parse(localStorage.getItem("grainHistory")) || [];
+    let text="ОТЧЁТ ПО АНАЛИЗУ УСЛОВИЙ ХРАНЕНИЯ ЗЕРНА\n";
+    text+="Выполнил: Молдашев Темирлан Жангельдинович\n";
+    text+="Группа: ВТ23-11\n\n";
+
+    if(history.length===0){
+        text+="История анализов отсутствует.\n";
+    }else{
+        history.forEach((item,index)=>{
+            text+=`${index+1}. Дата: ${item.date}\n`;
+            text+=`Температура: ${item.temp} °C\n`;
+            text+=`Влажность: ${item.hum} %\n`;
+            text+=`Уровень риска: ${item.risk}\n\n`;
+        });
+    }
+
+    const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
+    const link=document.createElement("a");
+    link.href=URL.createObjectURL(blob);
+    link.download="otchet_monitoring_zerna.txt";
+    link.click();
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>

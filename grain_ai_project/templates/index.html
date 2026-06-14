@@ -277,7 +277,7 @@ th,td{
 <div class="panel">
     <h2>📊 Панель анализа параметров хранения</h2>
 
-    <form method="POST" onsubmit="saveHistory()">
+<form onsubmit="saveHistory(event); return false;">
         <div class="form-grid">
             <div class="input-card">
                 <label>🌾 Тип зерна</label>

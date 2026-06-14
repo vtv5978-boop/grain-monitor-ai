@@ -488,7 +488,8 @@ if(localStorage.getItem("theme") === "dark"){
 }
 
 function updateDateTime(){
-    document.getElementById("datetime").innerText = new Date().toLocaleString("ru-RU");
+    const el = document.getElementById("datetime");
+    if(el) el.innerText = new Date().toLocaleString("ru-RU");
 }
 setInterval(updateDateTime,1000);
 updateDateTime();
@@ -502,6 +503,7 @@ function calculateRisk(temp,hum,grain){
     if(grain === "Кукуруза") percent += 10;
     if(grain === "Ячмень") percent += 6;
     if(grain === "Овёс") percent += 4;
+
     percent = Math.min(100, percent);
 
     let risk = "Низкий риск";
@@ -514,29 +516,29 @@ function calculateRisk(temp,hum,grain){
 function getAIAdvice(grain,temp,hum,risk){
     let advice=[];
 
-    if(grain === "Пшеница") advice.push("Для пшеницы рекомендуется поддерживать влажность не выше 65% и стабильную температуру хранения.");
-    if(grain === "Ячмень") advice.push("Для ячменя важно не допускать самосогревания и регулярно контролировать вентиляцию.");
-    if(grain === "Кукуруза") advice.push("Кукуруза особенно чувствительна к влажности, поэтому требуется усиленный контроль сырости.");
-    if(grain === "Овёс") advice.push("Для овса рекомендуется регулярный мониторинг влажности и температуры зерновой массы.");
+    if(grain === "Пшеница") advice.push("Для пшеницы рекомендуется поддерживать влажность не выше 65%.");
+    if(grain === "Ячмень") advice.push("Для ячменя важно контролировать вентиляцию и температуру.");
+    if(grain === "Кукуруза") advice.push("Кукуруза чувствительна к влажности, поэтому требуется усиленный контроль.");
+    if(grain === "Овёс") advice.push("Для овса рекомендуется регулярный мониторинг влажности и температуры.");
 
-    if(temp > 30) advice.push("Температура критически повышена: рекомендуется охлаждение и включение вентиляции.");
-    else if(temp > 25) advice.push("Температура выше оптимальной: рекомендуется усилить контроль.");
+    if(temp > 30) advice.push("Температура критически повышена, рекомендуется охлаждение.");
+    else if(temp > 25) advice.push("Температура выше оптимальной, рекомендуется усилить контроль.");
     else advice.push("Температура находится в допустимом диапазоне.");
 
-    if(hum > 80) advice.push("Влажность критическая: возможен риск плесени, требуется осушение.");
-    else if(hum > 70) advice.push("Влажность повышена: рекомендуется снизить влажность и проверить вентиляцию.");
+    if(hum > 80) advice.push("Влажность критическая, возможен риск плесени.");
+    else if(hum > 70) advice.push("Влажность повышена, рекомендуется вентиляция.");
     else advice.push("Влажность находится в допустимых пределах.");
 
-    if(risk === "Высокий риск") advice.push("ИИ прогнозирует высокий риск ухудшения качества зерна, нужна срочная проверка силоса.");
+    if(risk === "Высокий риск") advice.push("ИИ рекомендует срочно проверить силос.");
     else if(risk === "Средний риск") advice.push("ИИ рекомендует повторный анализ через несколько часов.");
-    else advice.push("Состояние партии стабильное, достаточно планового мониторинга.");
+    else advice.push("Состояние партии стабильное.");
 
     return advice.join(" ");
 }
 
 function getRecommendation(risk){
-    if(risk === "Высокий риск") return "Необходимо срочно включить вентиляцию, снизить влажность и проверить состояние партии зерна.";
-    if(risk === "Средний риск") return "Рекомендуется усилить контроль температуры, влажности и работы вентиляции.";
+    if(risk === "Высокий риск") return "Необходимо срочно включить вентиляцию, снизить влажность и проверить состояние партии.";
+    if(risk === "Средний риск") return "Рекомендуется усилить контроль температуры, влажности и вентиляции.";
     return "Условия хранения стабильные. Достаточно стандартного мониторинга.";
 }
 
@@ -545,101 +547,107 @@ function updateInterface(temp,hum,grain,silo,batch,showResult=false){
     silo = silo || document.getElementById("siloInput").value;
     batch = batch || document.getElementById("batchInput").value;
 
-    const data=calculateRisk(temp,hum,grain);
-    const risk=data.risk;
-    const percent=data.percent;
-    const block=document.getElementById("riskStatus");
-    const ai=document.getElementById("aiText");
-    const progress=document.getElementById("riskProgress");
-    const score=(10-percent/10).toFixed(1);
+    const data = calculateRisk(temp,hum,grain);
+    const risk = data.risk;
+    const percent = data.percent;
+    const score = (10 - percent / 10).toFixed(1);
 
-    document.getElementById("tempBar").style.height=Math.max(8,Math.min((temp/50)*100,100)*2)+"px";
-    document.getElementById("humBar").style.height=Math.max(8,Math.min(hum,100)*2)+"px";
+    document.getElementById("tempBar").style.height = Math.max(8,Math.min((temp/50)*100,100)*2)+"px";
+    document.getElementById("humBar").style.height = Math.max(8,Math.min(hum,100)*2)+"px";
 
-    document.getElementById("tempValue").innerText=temp+" °C";
-    document.getElementById("humValue").innerText=hum+" %";
-    document.getElementById("statTemp").innerText=temp+"°C";
-    document.getElementById("statHum").innerText=hum+"%";
-    document.getElementById("statRisk").innerText=risk;
-    document.getElementById("statScore").innerText=score+"/10";
-    progress.style.width=percent+"%";
-    progress.innerText=percent+"%";
+    document.getElementById("tempValue").innerText = temp+" °C";
+    document.getElementById("humValue").innerText = hum+" %";
+    document.getElementById("statTemp").innerText = temp+"°C";
+    document.getElementById("statHum").innerText = hum+"%";
+    document.getElementById("statRisk").innerText = risk;
+    document.getElementById("statScore").innerText = score+"/10";
 
-    const advice=getAIAdvice(grain,temp,hum,risk);
-    ai.innerHTML="ИИ-анализ: "+advice;
+    const progress = document.getElementById("riskProgress");
+    progress.style.width = percent+"%";
+    progress.innerText = percent+"%";
 
-    if(risk==="Высокий риск"){
-        block.style.background="#fee2e2";
-        block.style.color="#991b1b";
-        block.innerHTML="🔴 Статус системы: Высокий риск";
-    }else if(risk==="Средний риск"){
-        block.style.background="#fef3c7";
-        block.style.color="#92400e";
-        block.innerHTML="🟡 Статус системы: Средний риск";
-    }else{
-        block.style.background="#dcfce7";
-        block.style.color="#166534";
-        block.innerHTML="🟢 Статус системы: Низкий риск";
+    document.getElementById("aiText").innerHTML =
+        "ИИ-анализ: " + getAIAdvice(grain,temp,hum,risk);
+
+    const block = document.getElementById("riskStatus");
+
+    if(risk === "Высокий риск"){
+        block.style.background = "#fee2e2";
+        block.style.color = "#991b1b";
+        block.innerHTML = "🔴 Статус системы: Высокий риск";
+    } else if(risk === "Средний риск"){
+        block.style.background = "#fef3c7";
+        block.style.color = "#92400e";
+        block.innerHTML = "🟡 Статус системы: Средний риск";
+    } else {
+        block.style.background = "#dcfce7";
+        block.style.color = "#166534";
+        block.innerHTML = "🟢 Статус системы: Низкий риск";
     }
 
     if(showResult){
-        document.getElementById("resultBox").style.display="block";
-        document.getElementById("resultTitle").innerText=risk;
-        document.getElementById("resultRecommendation").innerText=getRecommendation(risk);
-        document.getElementById("passportGrain").innerText=grain;
-        document.getElementById("passportSilo").innerText=silo;
-        document.getElementById("passportBatch").innerText=batch;
+        document.getElementById("resultBox").style.display = "block";
+        document.getElementById("resultTitle").innerText = risk;
+        document.getElementById("resultRecommendation").innerText = getRecommendation(risk);
+        document.getElementById("passportGrain").innerText = grain;
+        document.getElementById("passportSilo").innerText = silo;
+        document.getElementById("passportBatch").innerText = batch;
     }
 }
 
 function randomData(){
-    const t=Math.floor(Math.random()*41);
-    const h=Math.floor(Math.random()*101);
-    const grains=["Пшеница","Ячмень","Кукуруза","Овёс"];
-    const silos=["Силос №1","Силос №2","Силос №3","Силос №4","Силос №5"];
-    document.getElementById("temperatureInput").value=t;
-    document.getElementById("humidityInput").value=h;
-    document.getElementById("grainTypeInput").value=grains[Math.floor(Math.random()*grains.length)];
-    document.getElementById("siloInput").value=silos[Math.floor(Math.random()*silos.length)];
-    document.getElementById("batchInput").value="GR-2026-00"+Math.floor(Math.random()*9+1);
+    const t = Math.floor(Math.random()*41);
+    const h = Math.floor(Math.random()*101);
+    const grains = ["Пшеница","Ячмень","Кукуруза","Овёс"];
+    const silos = ["Силос №1","Силос №2","Силос №3","Силос №4","Силос №5"];
+
+    document.getElementById("temperatureInput").value = t;
+    document.getElementById("humidityInput").value = h;
+    document.getElementById("grainTypeInput").value = grains[Math.floor(Math.random()*grains.length)];
+    document.getElementById("siloInput").value = silos[Math.floor(Math.random()*silos.length)];
+    document.getElementById("batchInput").value = "GR-2026-00" + Math.floor(Math.random()*9+1);
+
     updateInterface(t,h);
 }
 
-function saveHistory(){
-    const temp=document.getElementById("temperatureInput").value;
-    const hum=document.getElementById("humidityInput").value;
-    const grain=document.getElementById("grainTypeInput").value;
-    const silo=document.getElementById("siloInput").value;
-    const batch=document.getElementById("batchInput").value;
+function saveHistory(event){
+    if(event) event.preventDefault();
+
+    const temp = document.getElementById("temperatureInput").value;
+    const hum = document.getElementById("humidityInput").value;
+    const grain = document.getElementById("grainTypeInput").value;
+    const silo = document.getElementById("siloInput").value;
+    const batch = document.getElementById("batchInput").value;
+
     if(!temp || !hum) return;
 
-    const data=calculateRisk(parseFloat(temp),parseFloat(hum),grain);
-    const now=new Date().toLocaleString("ru-RU");
+    const data = calculateRisk(parseFloat(temp),parseFloat(hum),grain);
+    const now = new Date().toLocaleString("ru-RU");
 
-    let history=JSON.parse(localStorage.getItem("grainHistory")) || [];
+    let history = JSON.parse(localStorage.getItem("grainHistory")) || [];
     history.unshift({date:now,grain:grain,silo:silo,batch:batch,temp:temp,hum:hum,risk:data.risk});
-    history=history.slice(0,8);
+    history = history.slice(0,8);
     localStorage.setItem("grainHistory",JSON.stringify(history));
 
     updateInterface(parseFloat(temp),parseFloat(hum),grain,silo,batch,true);
     loadHistory();
-    event.preventDefault();
 }
 
 function loadHistory(){
-    const history=JSON.parse(localStorage.getItem("grainHistory")) || [];
-    const table=document.getElementById("historyTable");
+    const history = JSON.parse(localStorage.getItem("grainHistory")) || [];
+    const table = document.getElementById("historyTable");
 
-    if(history.length===0){
-        table.innerHTML="<tr><td colspan='7'>История пока пустая</td></tr>";
+    if(history.length === 0){
+        table.innerHTML = "<tr><td colspan='7'>История пока пустая</td></tr>";
         updateInterface(0,0,"Пшеница","Силос №1","GR-2026-001",false);
         return;
     }
 
-    table.innerHTML="";
+    table.innerHTML = "";
+
     history.forEach(item=>{
-        const row=document.createElement("tr");
-        row.innerHTML=`
+        const row = document.createElement("tr");
+        row.innerHTML = `
             <td>${item.date}</td>
             <td>${item.grain || "Пшеница"}</td>
             <td>${item.silo || "Силос №1"}</td>
@@ -651,74 +659,42 @@ function loadHistory(){
         table.appendChild(row);
     });
 
-    const first=history[0];
+    const first = history[0];
     updateInterface(parseFloat(first.temp),parseFloat(first.hum),first.grain,first.silo,first.batch,false);
 }
 
 function clearHistory(){
     localStorage.removeItem("grainHistory");
-    document.getElementById("resultBox").style.display="none";
+    document.getElementById("resultBox").style.display = "none";
     loadHistory();
 }
 
 function downloadReport(){
-    const history=JSON.parse(localStorage.getItem("grainHistory")) || [];
-    let text="ОТЧЁТ ПО АНАЛИЗУ УСЛОВИЙ ХРАНЕНИЯ ЗЕРНА\n";
-    text+="Выполнил: Молдашев Темирлан Жангельдинович\n";
-    text+="Группа: ВТ23-11\n";
-    text+="Тема: Разработка системы анализа и прогнозирования условий хранения зерновых культур с применением ИИ\n\n";
+    const history = JSON.parse(localStorage.getItem("grainHistory")) || [];
+    let text = "ОТЧЁТ ПО АНАЛИЗУ УСЛОВИЙ ХРАНЕНИЯ ЗЕРНА\n\n";
 
-    if(history.length===0){
-        text+="История анализов отсутствует.\n";
-    }else{
+    if(history.length === 0){
+        text += "История анализов отсутствует.\n";
+    } else {
         history.forEach((item,index)=>{
-            text+=`${index+1}. Дата: ${item.date}\n`;
-            text+=`Тип зерна: ${item.grain || "Пшеница"}\n`;
-            text+=`Силос: ${item.silo || "Силос №1"}\n`;
-            text+=`Партия: ${item.batch || "GR-2026-001"}\n`;
-            text+=`Температура: ${item.temp} °C\n`;
-            text+=`Влажность: ${item.hum} %\n`;
-            text+=`Уровень риска: ${item.risk}\n\n`;
+            text += `${index+1}. Дата: ${item.date}\n`;
+            text += `Тип зерна: ${item.grain}\n`;
+            text += `Силос: ${item.silo}\n`;
+            text += `Партия: ${item.batch}\n`;
+            text += `Температура: ${item.temp} °C\n`;
+            text += `Влажность: ${item.hum} %\n`;
+            text += `Уровень риска: ${item.risk}\n\n`;
         });
     }
 
-    const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
-    const link=document.createElement("a");
-    link.href=URL.createObjectURL(blob);
-    link.download="otchet_monitoring_zerna.txt";
-    link.click();
-}
-
-loadHistory();
-}
-
-function downloadReport(){
-    const history=JSON.parse(localStorage.getItem("grainHistory")) || [];
-    let text="ОТЧЁТ ПО АНАЛИЗУ УСЛОВИЙ ХРАНЕНИЯ ЗЕРНА\n";
-    text+="Выполнил: Молдашев Темирлан Жангельдинович\n";
-    text+="Группа: ВТ23-11\n";
-    text+="Тема: Разработка системы анализа и прогнозирования условий хранения зерновых культур с применением ИИ\n\n";
-
-    if(history.length===0){
-        text+="История анализов отсутствует.\n";
-    }else{
-        history.forEach((item,index)=>{
-            text+=`${index+1}. Дата: ${item.date}\n`;
-            text+=`Температура: ${item.temp} °C\n`;
-            text+=`Влажность: ${item.hum} %\n`;
-            text+=`Уровень риска: ${item.risk}\n\n`;
-        });
-    }
-
-    const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
-    const link=document.createElement("a");
-    link.href=URL.createObjectURL(blob);
-    link.download="otchet_monitoring_zerna.txt";
+    const blob = new Blob([text],{type:"text/plain;charset=utf-8"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "otchet_monitoring_zerna.txt";
     link.click();
 }
 
 loadHistory();
 </script>
-
 </body>
 </html>
